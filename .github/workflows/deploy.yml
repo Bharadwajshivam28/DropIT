@@ -23,10 +23,7 @@ jobs:
 
     - name: Clean up old files on DigitalOcean
       run: |
-        ssh root@${{ secrets.DO_SERVER_IP }} << 'EOF'
-          echo "Removing old files and directories..."
           rm -rf /root/app/*
-        EOF
 
     - name: Copy WebSocket App files to DigitalOcean
       run: |
