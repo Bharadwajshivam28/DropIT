@@ -21,6 +21,13 @@ jobs:
     # - name: Add DigitalOcean server to known_hosts
     #   run: ssh-keyscan -H ${{ secrets.DO_SERVER_IP }} >> ~/.ssh/known_hosts
 
+    - name: Clean up old files on DigitalOcean
+      run: |
+        ssh root@${{ secrets.DO_SERVER_IP }} << 'EOF'
+          echo "Removing old files and directories..."
+          rm -rf /root/app/*
+        EOF
+
     - name: Copy WebSocket App files to DigitalOcean
       run: |
         scp -r ./client/main.go ./server/room.go root@${{ secrets.DO_SERVER_IP }}:/root/app/
