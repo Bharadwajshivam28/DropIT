@@ -1,0 +1,48 @@
+name: Deploy WebSocket App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+
+    - name: Set up SSH for DigitalOcean
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
+
+    - name: Copy WebSocket App files to DigitalOcean
+      run: |
+        scp -r ./main.go ./room.go root@${{ secrets.DO_SERVER_IP }}:/root/app/
+
+    - name: Connect to DigitalOcean and deploy the app
+      run: |
+        ssh root@${{ secrets.DO_SERVER_IP }} << 'EOF'
+          cd /root/app/
+          echo "Building and running the WebSocket server..."
+          
+          # Install Go if it's not installed
+          if ! [ -x "$(command -v go)" ]; then
+            echo "Installing Go..."
+            wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+            tar -xvf go1.17.1.linux-amd64.tar.gz
+            mv go /usr/local
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+          fi
+
+          # Build and run the WebSocket server
+          go mod init websocket-app
+          go mod tidy
+          nohup go run main.go room.go &
+
+          echo "WebSocket server is running on port 8080"
+        EOF
