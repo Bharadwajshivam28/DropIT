@@ -34,18 +34,24 @@ jobs:
           # Install Go if it's not installed
           if ! [ -x "$(command -v go)" ]; then
             echo "Installing Go..."
-            wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
-            tar -xvf go1.17.1.linux-amd64.tar.gz
+            wget https://golang.org/dl/go1.19.7.linux-amd64.tar.gz
+            tar -xvf go1.19.7.linux-amd64.tar.gz
             mv go /usr/local
             export GOROOT=/usr/local/go
             export GOPATH=$HOME/go
             export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
           fi
 
-          # Build and run the WebSocket server
-          go mod init websocket-app
+          # Build the WebSocket app
+          go mod init websocket-app || true
           go mod tidy
-          nohup go run main.go room.go &
+          go build -o websocket-server main.go room.go
+
+          # Stop any running instances of the app
+          pkill -f websocket-server || true
+
+          # Run the WebSocket server in the background
+          nohup ./websocket-server &
 
           echo "WebSocket server is running on port 8080"
         EOF

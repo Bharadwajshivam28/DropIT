@@ -9,27 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
 	"github.com/gorilla/websocket"
 )
 
-func main() {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Do you want to (S)hare or (R)eceive files? (S/R): ")
-	choice, _ := reader.ReadString('\n')
-	choice = strings.TrimSpace(choice)
-
-	if choice == "S" {
-		shareFiles(reader)
-	} else if choice == "R" {
-		receiveFiles(reader)
-	} else {
-		fmt.Println("Invalid choice")
-	}
-}
-
 func shareFiles(reader *bufio.Reader) {
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/ws"}
+	// Connect to the WebSocket server on DigitalOcean IP
+	u := url.URL{Scheme: "ws", Host: "146.190.10.68:8080", Path: "/ws"}
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatalf("Dial error: %v", err)
@@ -88,7 +73,7 @@ func receiveFiles(reader *bufio.Reader) {
 	key, _ := reader.ReadString('\n')
 	key = strings.TrimSpace(key)
 
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/ws", RawQuery: "key=" + key}
+	u := url.URL{Scheme: "ws", Host: "146.190.10.68:8080", Path: "/ws", RawQuery: "key=" + key}
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatalf("Dial error: %v", err)
@@ -148,4 +133,19 @@ func receiveFiles(reader *bufio.Reader) {
 		}
 	}
 	fmt.Println("File received successfully!")
+}
+
+func main() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter mode (share/receive): ")
+	mode, _ := reader.ReadString('\n')
+	mode = strings.TrimSpace(mode)
+
+	if mode == "share" {
+		shareFiles(reader)
+	} else if mode == "receive" {
+		receiveFiles(reader)
+	} else {
+		fmt.Println("Invalid mode")
+	}
 }
