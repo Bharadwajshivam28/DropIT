@@ -23,7 +23,7 @@ jobs:
 
     - name: Clean up old files on DigitalOcean
       run: |
-          rm -rf /root/app/*
+        sudo rm -rf /root/app/*
 
     - name: Copy WebSocket App files to DigitalOcean
       run: |
